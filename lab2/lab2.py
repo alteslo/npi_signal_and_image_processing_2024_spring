@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import filedialog
-import numpy as np
 import wave
+from tkinter import filedialog
+
 import matplotlib.pyplot as plt
-from scipy.signal import butter, lfilter, freqz
+import numpy as np
+from scipy.signal import butter, freqz, lfilter
 
 
 class SignalProcessorApp:
@@ -12,23 +13,20 @@ class SignalProcessorApp:
         self.root.title("Signal Processor")
 
         # UI elements
-        self.load_button = tk.Button(
-            root, text="Load WAV File", command=self.load_wav)
+        self.load_button = tk.Button(root, text="Load WAV File", command=self.load_wav)
         self.load_button.pack()
 
-        self.filter_type_label = tk.Label(
-            root, text="Filter Type (low/high/band):")
+        self.filter_type_label = tk.Label(root, text="Filter Type (low/high/band):")
         self.filter_type_label.pack()
         self.filter_type_entry = tk.Entry(root)
         self.filter_type_entry.pack()
 
-        self.cutoff_label = tk.Label(root, text="Cutoff Frequency:")
+        self.cutoff_label = tk.Label(root, text="Cutoff Frequency (for 'band' enter as 'low,high'):")
         self.cutoff_label.pack()
         self.cutoff_entry = tk.Entry(root)
         self.cutoff_entry.pack()
 
-        self.process_button = tk.Button(
-            root, text="Process", command=self.process_signal)
+        self.process_button = tk.Button(root, text="Process", command=self.process_signal)
         self.process_button.pack()
 
         self.fig, self.axs = plt.subplots(2, 2)
@@ -39,8 +37,7 @@ class SignalProcessorApp:
         self.data = None
 
     def load_wav(self):
-        file_path = filedialog.askopenfilename(
-            filetypes=[("WAV files", "*.wav")])
+        file_path = filedialog.askopenfilename(filetypes=[("WAV files", "*.wav")])
         if file_path:
             with wave.open(file_path, 'rb') as wf:
                 self.samplerate = wf.getframerate()
@@ -50,7 +47,11 @@ class SignalProcessorApp:
 
     def butter_filter(self, data, cutoff, fs, btype, order=5):
         nyquist = 0.5 * fs
-        normal_cutoff = cutoff / nyquist
+        if btype == 'band':
+            low, high = map(float, cutoff.split(','))
+            normal_cutoff = [low / nyquist, high / nyquist]
+        else:
+            normal_cutoff = float(cutoff) / nyquist
         b, a = butter(order, normal_cutoff, btype=btype, analog=False)
         y = lfilter(b, a, data)
         return y
@@ -61,14 +62,13 @@ class SignalProcessorApp:
             return
 
         filter_type = self.filter_type_entry.get()
-        cutoff = float(self.cutoff_entry.get())
+        cutoff = self.cutoff_entry.get()
 
         if filter_type not in ['low', 'high', 'band']:
             print("Invalid filter type.")
             return
 
-        filtered_data = self.butter_filter(
-            self.data, cutoff, self.samplerate, btype=filter_type)
+        filtered_data = self.butter_filter(self.data, cutoff, self.samplerate, btype=filter_type)
 
         self.axs[0, 0].clear()
         self.axs[0, 0].plot(self.data)
