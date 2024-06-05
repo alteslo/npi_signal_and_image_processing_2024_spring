@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy.signal import freqz
 
+
 class CFApp:
     def __init__(self, root):
         self.root = root
@@ -42,7 +43,7 @@ class CFApp:
             data = data[:, 0]  # Используем только один канал для простоты
 
         # Нормализация данных
-        # data = data / np.max(np.abs(data), axis=0)
+        data = data / np.max(np.abs(data), axis=0)
 
         # Применение ЦФ
         output_signal = self.apply_filter(data, filter_type)
@@ -94,7 +95,7 @@ class CFApp:
         plt.title("Входной сигнал")
         plt.subplot(2, 1, 2)
         plt.plot(output_signal)
-        # plt.plot(t, output_signal)
+        plt.plot(t, output_signal)
         plt.title("Выходной сигнал")
         plt.tight_layout()
         plt.show()
@@ -109,7 +110,7 @@ class CFApp:
         plt.subplot(2, 1, 2)
         plt.plot(f_output, 20 * np.log10(np.abs(h_output)))
         plt.title("АЧХ Выходного сигнала")
-        # plt.tight_layout()
+        plt.tight_layout()
         plt.show()
 
 
