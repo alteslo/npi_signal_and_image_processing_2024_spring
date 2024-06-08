@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import filedialog
+
+import librosa
 import matplotlib.pyplot as plt
 import numpy as np
-import librosa
 import scipy.signal
+
 
 class SignalSegmentationApp:
     def __init__(self, root):
@@ -74,6 +76,7 @@ class SignalSegmentationApp:
         plt.xlabel('Time [s]')
         plt.ylabel('Amplitude')
         plt.show()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
