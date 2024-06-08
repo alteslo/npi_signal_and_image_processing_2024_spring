@@ -1,19 +1,28 @@
 import tkinter as tk
-from tkinter import filedialog, ttk, messagebox
-import numpy as np
+from tkinter import filedialog, messagebox, ttk
+
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.io import wavfile
 from scipy.signal import freqz
 
 
 class CFApp:
+    """
+    Основной класс приложения,
+    который отвечает за создание интерфейса и выполнение основных функций.
+    """
     def __init__(self, root):
+        """
+        Инициализирует основной интерфейс приложения, создает кнопки и меню.
+
+        :param root: главный элемент окна Tkinter
+        """
         self.root = root
         self.root.title("Процедуры ЦФ")
 
         self.filepath = None
 
-        # UI Elements
         self.load_button = ttk.Button(root, text="Загрузить WAV файл", command=self.load_wav_file)
         self.load_button.pack(pady=10)
 
@@ -29,9 +38,17 @@ class CFApp:
         self.plot_button.pack(pady=10)
 
     def load_wav_file(self):
+        """
+        Открывает диалоговое окно для выбора WAV файла и сохраняет путь к нему в переменной self.filepath
+        """
         self.filepath = filedialog.askopenfilename(filetypes=[("WAV files", "*.wav")])
 
     def plot_signals(self):
+        """
+        Проверяет, загружен ли файл. Если файл не загружен, выводит сообщение об ошибке.
+        Читает WAV файл, нормализует данные и применяет выбранный фильтр.
+        Вызывает функции для построения графиков временных и частотных характеристик
+        """
         if not self.filepath:
             messagebox.showerror("Ошибка", "Пожалуйста, загрузите WAV файл.")
             return
@@ -42,56 +59,68 @@ class CFApp:
         if data.ndim > 1:
             data = data[:, 0]  # Используем только один канал для простоты
 
-        # Нормализация данных
-        data = data / np.max(np.abs(data), axis=0)
-
-        # Применение ЦФ
-        output_signal = self.apply_filter(data, filter_type)
+        data = data / np.max(np.abs(data), axis=0)  # Нормализация данных
+        output_signal = self.apply_filter(data, filter_type)  # Применение ЦФ
 
         # Построение графиков
         self.plot_waveforms(data, output_signal, fs)
         self.plot_frequency_response(data, output_signal, fs)
 
     def apply_filter(self, signal, filter_type):
+        """
+        Применяет выбранный цифровой фильтр к сигналу
+
+        :param signal: входной аудиосигнал
+        :param filter_type: тип фильтра, выбранный пользователем
+        :return: выходной сигнал после фильтрации
+        """
         output_signal = np.zeros_like(signal)
-        if filter_type == 1:
-            for n in range(1, len(signal)):
-                output_signal[n] = signal[n] - 0.5 * signal[n - 1]
-        elif filter_type == 2:
-            for n in range(2, len(signal)):
-                output_signal[n] = signal[n] - 0.5 * signal[n - 1] + 0.5 * signal[n - 2]
-        elif filter_type == 3:
-            for n in range(2, len(signal)):
-                output_signal[n] = signal[n] + 0.5 * signal[n - 1] + 0.5 * signal[n - 2]
-        elif filter_type == 4:
-            for n in range(2, len(signal)):
-                output_signal[n] = 0.5 * signal[n] + 0.25 * signal[n - 1] + 0.25 * signal[n - 2]
-        elif filter_type == 5:
-            for n in range(1, len(signal)):
-                output_signal[n] = signal[n] - 0.5 * signal[n - 1] + 0.5 * output_signal[n - 1]
-        elif filter_type == 6:
-            for n in range(2, len(signal)):
-                output_signal[n] = signal[n] + 0.5 * signal[n - 1] - signal[n - 2] - 0.5 * output_signal[n - 1]
-        elif filter_type == 7:
-            for n in range(2, len(signal)):
-                output_signal[n] = signal[n] + 0.5 * signal[n - 1] - 0.5 * signal[n - 2] - 0.5 * output_signal[n - 1]
-        elif filter_type == 8:
-            for n in range(2, len(signal)):
-                output_signal[n] = signal[n] - 0.5 * signal[n - 1] - 0.5 * signal[n - 2] - 0.5 * output_signal[n - 1]
-        elif filter_type == 9:
-            for n in range(2, len(signal)):
-                output_signal[n] = signal[n] + 0.5 * signal[n - 1] + 0.5 * signal[n - 2] - 0.5 * output_signal[n - 1]
-        elif filter_type == 10:
-            for n in range(2, len(signal)):
-                output_signal[n] = signal[n] - 0.5 * signal[n - 1] + 0.5 * signal[n - 2] + 0.5 * output_signal[n - 1]
+        match filter_type:
+            case 1:
+                for n in range(1, len(signal)):
+                    output_signal[n] = signal[n] - 0.5 * signal[n - 1]
+            case 2:
+                for n in range(2, len(signal)):
+                    output_signal[n] = signal[n] - 0.5 * signal[n - 1] + 0.5 * signal[n - 2]
+            case 3:
+                for n in range(2, len(signal)):
+                    output_signal[n] = signal[n] + 0.5 * signal[n - 1] + 0.5 * signal[n - 2]
+            case 4:
+                for n in range(2, len(signal)):
+                    output_signal[n] = 0.5 * signal[n] + 0.25 * signal[n - 1] + 0.25 * signal[n - 2]
+            case 5:
+                for n in range(1, len(signal)):
+                    output_signal[n] = signal[n] - 0.5 * signal[n - 1] + 0.5 * output_signal[n - 1]
+            case 6:
+                for n in range(2, len(signal)):
+                    output_signal[n] = signal[n] + 0.5 * signal[n - 1] - signal[n - 2] - 0.5 * output_signal[n - 1]
+            case 7:
+                for n in range(2, len(signal)):
+                    output_signal[n] = signal[n] + 0.5 * signal[n - 1] - 0.5 * signal[n - 2] - 0.5 * output_signal[n - 1]
+            case 8:
+                for n in range(2, len(signal)):
+                    output_signal[n] = signal[n] - 0.5 * signal[n - 1] - 0.5 * signal[n - 2] - 0.5 * output_signal[n - 1]
+            case 9:
+                for n in range(2, len(signal)):
+                    output_signal[n] = signal[n] + 0.5 * signal[n - 1] + 0.5 * signal[n - 2] - 0.5 * output_signal[n - 1]
+            case 10:
+                for n in range(2, len(signal)):
+                    output_signal[n] = signal[n] - 0.5 * signal[n - 1] + 0.5 * signal[n - 2] + 0.5 * output_signal[n - 1]
         return output_signal
 
     def plot_waveforms(self, input_signal, output_signal, fs):
+        """
+        Строит графики временных характеристик входного и выходного сигналов. 
+
+        :param input_signal: входной сигнал
+        :param output_signal: выходной сигнал после фильтрации
+        :param fs: частота дискретизации
+        """
         t = np.arange(len(input_signal)) / fs
         plt.figure()
         plt.subplot(2, 1, 1)
         plt.plot(input_signal)
-        # plt.plot(t, input_signal)
+        plt.plot(t, input_signal)
         plt.title("Входной сигнал")
         plt.subplot(2, 1, 2)
         plt.plot(output_signal)
@@ -101,6 +130,13 @@ class CFApp:
         plt.show()
 
     def plot_frequency_response(self, input_signal, output_signal, fs):
+        """
+        Строит графики частотных характеристик входного и выходного сигналов.
+
+        :param input_signal: входной сигнал
+        :param output_signal: выходной сигнал после фильтрации
+        :param fs: частота дискретизации
+        """
         f_input, h_input = freqz(input_signal, fs=fs)
         f_output, h_output = freqz(output_signal, fs=fs)
         plt.figure()

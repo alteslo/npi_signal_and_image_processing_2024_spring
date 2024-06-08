@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.io import wavfile
-from scipy.signal import find_peaks, correlate
-from scipy.fftpack import fft
+from scipy.signal import correlate, find_peaks
 
 
 class SignalSegmentationApp:
@@ -58,7 +58,7 @@ class SignalSegmentationApp:
         # Простой алгоритм сегментации по шаблону
         duration = 1  # seconds
         t = np.linspace(0, duration, int(self.sampling_rate * duration), endpoint=False)
-        template = 15 * np.cos(2 * 2 * np.pi * t) + 3 * np.cos(20 * np.pi * t)
+        template = 15 * np.cos(4 * np.pi * t) + 3 * np.cos(20 * np.pi * t)
         template = template / np.max(np.abs(template), axis=0)
 
         correlation = correlate(self.signal, template, mode='valid')

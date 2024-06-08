@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageTk
 
+
 class ImageProcessingApp:
     def __init__(self, root):
         self.root = root
@@ -96,7 +97,8 @@ class ImageProcessingApp:
             messagebox.showerror("Ошибка", "Пожалуйста, загрузите изображение.")
             return
         c = 255 / np.log(1 + np.max(self.image))
-        self.processed_image = (c * (np.log(1 + self.image))).astype(np.uint8)
+        image_log = np.where(self.image == 0, 1, self.image)  # Заменяем нули на единицы, чтобы избежать деления на ноль
+        self.processed_image = (c * (np.log(1 + image_log))).astype(np.uint8)
         self.display_image(self.processed_image)
 
     def power_transform(self, gamma):
