@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+
 import cv2
 import numpy as np
 from PIL import Image, ImageTk
@@ -13,7 +14,6 @@ class ImageProcessingApp:
         self.image = None
         self.processed_image = None
 
-        # UI Elements
         self.load_button = ttk.Button(root, text="Загрузить изображение", command=self.load_image)
         self.load_button.pack(pady=10)
 

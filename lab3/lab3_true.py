@@ -35,7 +35,6 @@ class SignalSegmentationApp:
         self.plot_signal(self.signal, title="Modeled Signal")
 
     def segment_signal(self):
-        # Example segmentation based on energy thresholding
         energy = np.abs(self.signal) ** 2
         threshold = np.mean(energy) * 1.5
         segments = energy > threshold
@@ -45,11 +44,10 @@ class SignalSegmentationApp:
 
         self.plot_signal(self.signal, title="Segmented Signal", segment_boundaries=(segment_start_indices, segment_end_indices))
 
-        # Calculate spectral characteristics for each segment
         self.reference_vectors = []
         for start, end in zip(segment_start_indices, segment_end_indices):
             segment = self.signal[start:end]
-            if len(segment) < 1024:  # Ensure the segment is long enough for Welch's method
+            if len(segment) < 1024:
                 continue
             avg_freq, peak_freq = self.calculate_spectral_features(segment)
             if avg_freq is not None and peak_freq is not None:
@@ -58,7 +56,7 @@ class SignalSegmentationApp:
 
     def calculate_spectral_features(self, segment):
         f, Pxx = scipy.signal.welch(segment, fs=self.sr, nperseg=1024)
-        if len(Pxx) == 0:  # Check if Pxx is empty
+        if len(Pxx) == 0:
             return None, None
         avg_freq = np.sum(f * Pxx) / np.sum(Pxx)
         peak_freq = f[np.argmax(Pxx)]
